@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今治市 デジタルニュースボード</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #0f172a;
+        }
+
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeInScale 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+        .ticker-text {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            animation: ticker 30s linear infinite;
+        }
+        
+        .progress-bar-transition {
+            transition: width 5s linear;
+        }
+    </style>
+</head>
+<body class="text-white h-screen w-screen overflow-hidden flex flex-col bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+
+    <header class="flex justify-between items-center p-6 bg-slate-900/60 backdrop-blur-md border-b border-slate-700/50 shadow-lg z-10">
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-600 p-3 rounded-xl shadow-lg shadow-blue-500/30">
+                <i class="fas fa-ship text-3xl text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-white">
+                    IMABARI CITY NEWS
+                </h1>
+                <p class="text-sm text-blue-300 font-bold tracking-widest opacity-80">今治市 新着情報掲示板</p>
+            </div>
+        </div>
+        <div class="flex flex-col items-end">
+            <div id="clock-date" class="text-lg font-bold text-gray-300">YYYY/MM/DD</div>
+            <div id="clock-time" class="text-3xl font-mono font-bold text-white tracking-wider">HH:MM:SS</div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col items-center justify-center p-8 relative overflow-hidden">
+        
+        <div id="loading" class="flex flex-col items-center gap-4">
+            <i class="fas fa-circle-notch fa-spin text-5xl text-blue-500"></i>
+            <p class="text-xl font-bold text-blue-200 animate-pulse">最新情報を読み込み中...</p>
+        </div>
+
+        <div id="error-message" class="hidden flex-col items-center gap-4 text-red-400 bg-red-900/30 p-8 rounded-2xl border border-red-500/30">
+            <i class="fas fa-exclamation-triangle text-5xl"></i>
+            <p class="text-xl font-bold text-center">データの読み込みに失敗しました。</p>
+            <button onclick="fetchAndStart()" class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-500 text-white rounded-full transition font-bold">
+                再試行
+            </button>
+        </div>
+
+        <div id="news-container" class="hidden w-full max-w-6xl flex flex-col items-center text-center gap-8 z-10">
+            <div class="bg-blue-500/20 border border-blue-400/50 text-blue-100 px-6 py-2 rounded-full text-2xl font-bold tracking-wider shadow-lg flex items-center gap-3">
+                <i class="far fa-calendar-alt text-blue-300"></i>
+                <span id="news-date">YYYY年M月D日</span>
+                <span id="new-badge" class="ml-2 bg-red-500 text-white text-sm px-2 py-0.5 rounded animate-pulse hidden">NEW</span>
+            </div>
+            
+            <div class="relative px-4 w-full">
+                <i class="fas fa-quote-left text-6xl text-slate-700 absolute -top-8 -left-4 md:left-8 opacity-50"></i>
+                <h2 id="news-title" class="text-4xl md:text-6xl lg:text-7xl font-black leading-tight text-white drop-shadow-2xl z-10 relative">
+                    ニュースタイトル
+                </h2>
+                <i class="fas fa-quote-right text-6xl text-slate-700 absolute -bottom-10 -right-4 md:right-8 opacity-50"></i>
+            </div>
+            
+            <div class="bg-slate-800/80 backdrop-blur-sm border border-slate-600 p-6 rounded-2xl w-full max-w-4xl mt-8 shadow-2xl flex flex-col gap-3 text-left">
+                <div class="flex items-center gap-2 text-yellow-400 font-bold text-sm">
+                    <i class="fas fa-robot"></i> <span>システムによる自動要約</span>
+                </div>
+                <p id="news-original" class="text-lg md:text-xl text-gray-300 border-l-4 border-slate-500 pl-4">
+                    原文: 
+                </p>
+                <div class="flex items-center justify-end mt-2">
+                    <span id="news-counter" class="bg-slate-700 text-gray-300 px-4 py-1 rounded-full text-sm font-bold">
+                        1 / 10
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <i class="fas fa-bullhorn absolute text-[20rem] text-slate-800/30 -bottom-20 -left-20 -z-0 transform -rotate-12"></i>
+    </main>
+
+    <footer class="bg-slate-900 border-t border-slate-700 flex flex-col z-10">
+        <div class="h-1.5 w-full bg-slate-800">
+            <div id="progress-bar" class="h-full bg-blue-400 w-0"></div>
+        </div>
+        
+        <div class="flex items-center bg-slate-900/90 py-3 relative overflow-hidden">
+            <div class="bg-blue-600 text-white font-black px-6 py-2 ml-4 rounded-md shadow-md z-10 flex items-center gap-2 shrink-0">
+                <i class="fas fa-bolt text-yellow-300"></i> LATEST 1 WEEK
+            </div>
+            <div class="absolute left-40 w-16 h-full bg-gradient-to-r from-slate-900 to-transparent z-10"></div>
+            <div class="absolute right-0 w-24 h-full bg-gradient-to-l from-slate-900 to-transparent z-10"></div>
+            
+            <div class="overflow-hidden w-full flex items-center">
+                <div id="ticker-text" class="ticker-text text-xl font-bold text-gray-200">
+                    <!-- Javascriptで内容を挿入 -->
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const DISPLAY_DURATION = 5000;
+        let newsData = [];
+        let currentIndex = 0;
+        let intervalId = null;
+
+        // 時計更新
+        function updateClock() {
+            const now = new Date();
+            const days = ['日', '月', '火', '水', '木', '金', '土'];
+            document.getElementById('clock-date').textContent = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} (${days[now.getDay()]})`;
+            document.getElementById('clock-time').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 日本語要約エンジン
+        function simplifyTitle(text) {
+            let s = text.replace(/（[^）]*）/g, '').replace(/【[^】]*】/g, '').replace(/\[[^\]]*\]/g, '');
+            const rules = [
+                { p: /に係る公募型プロポーザルの実施について.*/g, r: 'の提案募集' },
+                { p: /に係る公募型プロポーザルの選定結果について.*/g, r: 'の提案選定結果' },
+                { p: /の実施について.*/g, r: 'を実施' },
+                { p: /について、.*/g, r: 'について' },
+                { p: /を掲載しました。?/g, r: 'を公開' },
+                { p: /を更新しました。?/g, r: 'を更新' },
+                { p: /新たに開設いたしました！?/g, r: 'を新規開設' },
+                { p: /のご案内/g, r: 'のお知らせ' },
+                { p: /を開催します！?/g, r: 'を開催' },
+                { p: /の受付について/g, r: 'の受付開始' },
+                { p: /公募型プロポーザル/g, r: '企画提案' },
+                { p: /サウンディング型市場調査/g, r: '市場調査' }
+            ];
+            rules.forEach(rule => s = s.replace(rule.p, rule.r));
+            if (s.endsWith('について')) s = s.slice(0, -4);
+            return s.trim() || text;
+        }
+
+        function isWithinOneWeek(dateStr) {
+            const m = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+            if (!m) return false;
+            const newsDate = new Date(m[1], m[2] - 1, m[3]);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return (today.getTime() - newsDate.getTime()) / 86400000 <= 7;
+        }
+
+        function isToday(dateStr) {
+            const m = dateStr.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+            if (!m) return false;
+            const newsDate = new Date(m[1], m[2] - 1, m[3]);
+            const today = new Date();
+            return newsDate.getDate() === today.getDate() && newsDate.getMonth() === today.getMonth();
+        }
+
+        async function fetchAndStart() {
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('error-message').classList.add('hidden');
+            
+            try {
+                // 同じディレクトリにある news_data.json を直接読み込む
+                // パスにキャッシュ対策のクエリパラメータを付与
+                const response = await fetch(`news_data.json?t=${new Date().getTime()}`);
+                if (!response.ok) throw new Error('Data file not found');
+                
+                const rawData = await response.json();
+                
+                let extractedNews = rawData.map(item => ({
+                    date: item.date,
+                    original: item.original,
+                    simplified: simplifyTitle(item.original)
+                }));
+
+                newsData = extractedNews.filter(item => isWithinOneWeek(item.date));
+                if (newsData.length === 0 && extractedNews.length > 0) {
+                    newsData = extractedNews.slice(0, 5); // データがない場合は最新5件
+                }
+                
+                if (newsData.length === 0) throw new Error('No Data');
+
+                document.getElementById('loading').classList.add('hidden');
+                setupTicker();
+                startNewsLoop();
+
+            } catch (error) {
+                console.error("データの取得に失敗しました:", error);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('error-message').classList.remove('hidden');
+            }
+        }
+
+        function setupTicker() {
+            const tickerContainer = document.getElementById('ticker-text');
+            const tickerString = newsData.map(item => `【${item.date}】 ${item.simplified}`).join('　　✦　　');
+            tickerContainer.textContent = tickerString + '　　✦　　' + tickerString;
+        }
+
+        function showNextNews() {
+            if (newsData.length === 0) return;
+            const item = newsData[currentIndex];
+            const container = document.getElementById('news-container');
+            const titleEl = document.getElementById('news-title');
+            
+            container.classList.remove('animate-fade-in');
+            
+            setTimeout(() => {
+                document.getElementById('news-date').textContent = item.date;
+                titleEl.textContent = item.simplified;
+                document.getElementById('news-original').textContent = `原文: ${item.original}`;
+                document.getElementById('news-counter').textContent = `${currentIndex + 1} / ${newsData.length}`;
+                
+                const badge = document.getElementById('new-badge');
+                if (isToday(item.date)) badge.classList.remove('hidden');
+                else badge.classList.add('hidden');
+                
+                if (item.simplified.length > 30) titleEl.className = "text-3xl md:text-5xl font-black leading-tight text-white drop-shadow-2xl z-10 relative";
+                else if (item.simplified.length > 15) titleEl.className = "text-4xl md:text-6xl font-black leading-tight text-white drop-shadow-2xl z-10 relative";
+                else titleEl.className = "text-5xl md:text-7xl font-black leading-tight text-white drop-shadow-2xl z-10 relative";
+
+                container.classList.remove('hidden');
+                container.classList.add('animate-fade-in');
+                
+                const progressBar = document.getElementById('progress-bar');
+                progressBar.classList.remove('progress-bar-transition');
+                progressBar.style.width = '0%';
+                void progressBar.offsetWidth; // リペイント強制
+                progressBar.classList.add('progress-bar-transition');
+                progressBar.style.width = '100%';
+
+                currentIndex = (currentIndex + 1) % newsData.length;
+            }, 50);
+        }
+
+        function startNewsLoop() {
+            if (intervalId) clearInterval(intervalId);
+            showNextNews();
+            intervalId = setInterval(showNextNews, DISPLAY_DURATION);
+        }
+
+        window.onload = fetchAndStart;
+    </script>
+</body>
+</html>
