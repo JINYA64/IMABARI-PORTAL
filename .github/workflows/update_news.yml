@@ -1,19 +1,4 @@
-name: Update Imabari News Data
-
-on:
-schedule:
-# UTC時間での指定 (日本時間JSTから-9時間)
-# 日本時間 09:00, 15:00, 21:00 に実行
-- cron: '0 0,6,12 * * *'
-workflow_dispatch: # GitHubの画面から手動で実行できるボタンを有効化
-
-jobs:
-scrape-and-update:
-runs-on: ubuntu-latest
-permissions:
-contents: write # リポジトリへの書き込み権限を付与
-
-steps:
+name: Update Imabari News Dataon:schedule:- cron: '0 0,6,12 * * *'workflow_dispatch:jobs:scrape-and-update:runs-on: ubuntu-latestpermissions:contents: writesteps:
   - name: Checkout repository
     uses: actions/checkout@v4
 
@@ -35,5 +20,4 @@ steps:
       git config --global user.email "github-actions[bot]@users.noreply.github.com"
       git config --global user.name "github-actions[bot]"
       git add news_data.json
-      # 変更がある場合のみコミットしてプッシュする
       git diff --quiet && git diff --staged --quiet || (git commit -m "Update news data automatically" && git push)
