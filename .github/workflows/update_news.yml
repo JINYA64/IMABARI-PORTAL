@@ -1,14 +1,4 @@
-name: Update Imabari News Data
-on:
-schedule:
-- cron: '0 0,6,12 * * *'
-workflow_dispatch:
-jobs:
-scrape-and-update:
-runs-on: ubuntu-latest
-permissions:
-contents: write
-steps:
+name: Update Imabari News Dataon:schedule:- cron: '0 0,6,12 * * *'workflow_dispatch:jobs:scrape-and-update:runs-on: ubuntu-latestpermissions:contents: writesteps:
   - name: Checkout repository
     uses: actions/checkout@v4
 
