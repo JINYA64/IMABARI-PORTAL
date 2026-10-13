@@ -1,7 +1,15 @@
 {
-  "generated_at": "2026-10-12T01:34:56",
+  "generated_at": "2026-10-13T03:07:39",
   "source": "https://www.city.imabari.ehime.jp/whatsnew.html",
   "items": [
+    {
+      "date": "2026-10-13",
+      "category": "お知らせ",
+      "title": "映画『汝、星のごとく』星をたどって、今治へ。聖地巡礼ガイドブックのお知らせ",
+      "official_title": "映画『汝、星のごとく』星をたどって、今治へ。聖地巡礼ガイドブックについて",
+      "summary": "瀬戸内が舞台となった映画『汝、星のごとく』が公開されます。",
+      "url": "https://www.city.imabari.ehime.jp/kankou/info/nanji/#guidebook"
+    },
     {
       "date": "2026-10-09",
       "category": "お知らせ",
@@ -81,22 +89,6 @@
       "official_title": "漂流物（ボート）の拾得について【今治市大浜沖】",
       "summary": "漂流物（ボート）の拾得の届出があったので、水難救護法（明治32年法律第95号）第25条第2項の規定により次のとおり公告します。お心当たりの方はご連絡ください。",
       "url": "https://www.city.imabari.ehime.jp/kouwan/info/015/"
-    },
-    {
-      "date": "2026-10-06",
-      "category": "募集・イベント",
-      "title": "令和8年度　⽇本⼀おいしい給⾷レシピコンテストを開催しました。",
-      "official_title": "令和8年度　⽇本⼀おいしい給⾷レシピコンテストを開催しました。",
-      "summary": "令和8年9⽉19⽇（土曜日）に、今治明徳短期⼤学を会場として「⽇本⼀おいしい給⾷レシピコンテスト」を開催しました。",
-      "url": "https://www.city.imabari.ehime.jp/kyushoku/project/R08/004/"
-    },
-    {
-      "date": "2026-10-06",
-      "category": "募集・イベント",
-      "title": "秋のビーチクリーン（鵜島）の開催について（11月1日開催）",
-      "official_title": "秋のビーチクリーン（鵜島）の開催について（11月1日開催）",
-      "summary": "期間・日程：令和8年11月1日（日曜日）9時～16時（受付9時～） ※天候不順の場合は当日午前7時に決…　対象：「秋のビーチクリーン」へ参加される方は以下のフォームより事前申込をお願いします。　問い合わせ：電話番号：0898-36-1535 メール： kankyou@imabari-city.j…",
-      "url": "https://www.city.imabari.ehime.jp/kankyou/info/011/"
     }
   ]
 }
